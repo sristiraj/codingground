@@ -2,6 +2,8 @@ import re
 import pandas as pd
 import datetime
 from pandas import ExcelWriter as EW
+from os import walk
+
 
 def log_message(lines, initChar, endChar, lineno):
     startmessage = False
@@ -79,6 +81,7 @@ def log_parse(logfilepath, excelfilepath, stringsearch, stringenddelimiter, date
         f.close()
 
         df = pd.DataFrame(messages)
+        # Filter only valid values with SAW Catalog path
         df = df[df['SAW_SRC_PATH=']!=''][['SAW_SRC_PATH=','executiondate','message','username: ']]
         writer = EW(excelfilepath)
         df.to_excel(writer, "sheet1")
@@ -86,6 +89,17 @@ def log_parse(logfilepath, excelfilepath, stringsearch, stringenddelimiter, date
 
 
 if __name__ == "__main__":
-    INPUT_LOG_PATH = r"C:\Users\Sristi Raj\Downloads\obis1-query.log"
-    OUTPUT_PATH = r"C:\Users\Sristi Raj\Desktop\obis1-query_12\output.xlsx"
-    log_parse(INPUT_LOG_PATH, OUTPUT_PATH, [r'username: ', r'SAW_SRC_PATH='], [r']', r';'], r'\[dd-dd-dd\].', '[[', ']]')
+
+    # Don't provide a "/" or "\" at the end of path
+    INPUT_LOG_PATH = r"C:\Users\Sristi Raj\Downloads\OBILogs"
+
+    #Provide file name as well for output in XLSX format
+    OUTPUT_PATH = r"C:\Users\Sristi Raj\Downloads\OBILogs\Output"
+
+    # Traverse  log directory and read all logs
+    f = []
+    for (dirpath, dirnames, filenames) in walk(INPUT_LOG_PATH):
+        f.extend(filenames)
+        break
+    for file in f:
+        log_parse(INPUT_LOG_PATH+'/'+file, OUTPUT_PATH+'/'+file+'.xlsx', [r'username: ', r'SAW_SRC_PATH='], [r']', r';'], r'\[dd-dd-dd\].', '[[', ']]')
