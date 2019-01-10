@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import itertools
 
+INPUT_FILE_LOCATION = r'C:\Users\Sristi Raj\Documents\WIP\desktop\PRHier.csv'
+OUTPUT_FILE_LOCATION = r'C:\Users\Sristi Raj\Documents\WIP\desktop\ParentChild.csv'
 
 def get_level_values(df, level):
     return df.loc[df['parent'].isin(level)]
@@ -9,10 +11,10 @@ def get_level_values(df, level):
 
 if __name__ == "__main__":
     print("hello")
-    lst = np.array([[0,1],[1, 2],[1, 3],[2, 4],[2, 5],[4, 6],[3,7],[6,9],[7,10],[10,15],[15,20]])
+    #lst = pd.read_csv(r'C:\Users\Sristi Raj\Documents\WIP\desktop\PRHier.csv')
     #print(lst)
-    df = pd.DataFrame(lst, columns=['parent', 'child'])
-    #print(df)
+    df = pd.read_csv(INPUT_FILE_LOCATION)
+    print(df)
     df = df.sort_values(by=['parent'])
     #print(df)
     level = [0]
@@ -29,17 +31,26 @@ if __name__ == "__main__":
             df_return = get_level_values(df, level)
             column_names.append('level'+str(lvl_no))
             print(column_names)
+            df_orig = df_final.copy()
             df_final = pd.merge(df_final, df_return, how='left',left_on=['level'+str(lvl_no-1)], right_on=['parent'])
             x = len(column_names)-1
             col = column_names[0:x]
+            df_orig['child'] = np.nan
+            print(df_orig)
             #print(col)
             col.append('child')
             print(col)
             df_final = df_final[col]
+
+            # print("Yes")
+            # print(df_final)
+            # print(df_orig)
+            # print("ok")
+            df_final = pd.concat([df_final, df_orig], ignore_index=True)
+            df_final.drop_duplicates(keep='first', inplace=True)
             second_last_column = 'level'+str(lvl_no-1)
             df_final['child'].fillna(df_final[second_last_column], inplace=True)
             df_final.columns = column_names
-
         print(df_final)
 
         level = df_return['child']
@@ -48,4 +59,4 @@ if __name__ == "__main__":
         print(df)
         lvl_no = lvl_no + 1
     print(df_final)
-    df_final.to_csv(r'C:\Users\Sristi Raj\Documents\WIP\desktop\ParentChild.csv')
+    df_final.to_csv(OUTPUT_FILE_LOCATION)
