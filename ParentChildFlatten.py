@@ -36,7 +36,10 @@ if __name__ == "__main__":
             col.append('child')
             print(col)
             df_final = df_final[col]
+            second_last_column = 'level'+str(lvl_no-1)
+            df_final['child'].fillna(df_final[second_last_column], inplace=True)
             df_final.columns = column_names
+
         print(df_final)
 
         level = df_return['child']
